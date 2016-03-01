@@ -5,8 +5,10 @@
 
 ## Problem Set 4 ##
 
-## Importing Data
 library(rvest)
+library(plyr)
+
+## Importng Data
 wikiURL <- 'https://en.wikipedia.org/wiki/List_of_United_States_presidential_elections_by_popular_vote_margin'
 
 # Imports tables from URL
@@ -32,15 +34,14 @@ colnames(election.data) <- c("Election #",
                              "Electoral College Runner-Up Party", 
                              "Turnout")
 
-# Removes redundant first two rows
-election.data <- election.data[-c(1,2), ]
+# Removes redundant first two rows and outlier third row
+election.data <- election.data[-c(1, 2, 3), ]
 
 # Gets rid of strange duplicate formatting in Popular Vote Margin % column
-election.data$`Popular Vote Margin %`[1] <- substr(election.data$`Popular Vote Margin %`[1], 7, 13)
-for (i in 2:4) {
+for (i in 1:3) {
   election.data$`Popular Vote Margin %`[i] <- substr(election.data$`Popular Vote Margin %`[i], 7, 12)
 }
-for (i in 5:29) {
+for (i in 4:28) {
   election.data$`Popular Vote Margin %`[i] <- substr(election.data$`Popular Vote Margin %`[i], 7, 11)
 }
 
@@ -50,8 +51,7 @@ for (i in 1:length(election.data$`Popular Vote Margin %`)) {
 }
 
 # Removes negative symbols from first four rows of Popular Vote Margin % column
-election.data$`Popular Vote Margin %`[1] <- substr(election.data$`Popular Vote Margin %`[1], 2, 6)
-for (i in 2:4) {
+for (i in 1:3) {
   election.data$`Popular Vote Margin %`[i] <- substr(election.data$`Popular Vote Margin %`[i], 2, 5)
 }
 
@@ -59,7 +59,50 @@ for (i in 2:4) {
 election.data$`Popular Vote Margin %` <- as.numeric(election.data$`Popular Vote Margin %`)
 
 # Restores negative values of Popular Vote Margin column
-for (i in 1:4) {
+for (i in 1:3) {
   election.data$`Popular Vote Margin %`[i] <- -1 * election.data$`Popular Vote Margin %`[i]
 }
+
+# Sorts data by year
+election.data <- arrange(election.data, election.data$Year)
+
+
+## Subsetting Data for Plot
+# Subsets Democratic Electoral College winners and sorts by year
+dem.rows <- grep("Dem.", election.data$`Electoral College Winner Party`)
+dem.data <- election.data[dem.rows, ]
+dem.data <- arrange(dem.data, dem.data$Year)
+
+# Subsets Republican Electoral College winners and sorts by year
+rep.rows <- grep("Rep.", election.data$`Electoral College Winner Party`)
+rep.data <- election.data[rep.rows, ]
+rep.data <- arrange(rep.data, rep.data$Year)
+
+
+## Plotting Data
+# Creates empty plot
+plot(NULL, NULL,
+     xlab = "Year", 
+     ylab = "Popular Vote Margin (%)", 
+     main = "Popular Vote Margin by Year",
+     xlim = c(1820,2020),
+     ylim = c(-10, 40))
+
+# Adds line chart of popular vote margin by year
+lines(election.data$Year, election.data$`Popular Vote Margin %`, lwd = 2)
+
+# Plots Democratic data points
+points(dem.data$Year, dem.data$`Popular Vote Margin %`, pch = 17, col = "BLUE")
+
+# Plots Republican data points
+points(rep.data$Year, rep.data$`Popular Vote Margin %`, pch = 15, col = "RED")
+
+# Adds dotted line at 0%
+abline(0, 0, lty = 2)
+
+# Creates Legend
+legend("topleft",
+       legend=c("Democratic Winners", "Republican Winners"), 
+       pch=c(17,15),
+       col=c("BLUE", "RED"), cex=0.9)
 
