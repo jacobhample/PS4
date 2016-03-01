@@ -7,6 +7,7 @@
 
 library(rvest)
 library(plyr)
+# could also have used library(htmltab), which would have worked better :(
 
 ## Importng Data
 wikiURL <- 'https://en.wikipedia.org/wiki/List_of_United_States_presidential_elections_by_popular_vote_margin'
@@ -97,6 +98,12 @@ other.data <- election.data[other.rows, ]
 # Sets working directory
 setwd("/Users/Jacob/Google Drive/Senior Year/Spring 2016/Statistical Programming/Problem Sets/PS4")
 
+#Creates pdf
+pdf("PS4Plots.pdf")
+
+# Sets plotting parameters
+par(mfrow = c(2,1))
+
 # Plot 1
 # Creates empty plot
 plot(NULL, NULL,
@@ -125,7 +132,7 @@ abline(0, 0, lty = 2)
 legend("topleft",
        legend = c("Democratic Winners", "Republican Winners", "Other Party Winners"), 
        pch = c(17, 15, 16),
-       col = c("BLUE", "RED", "PURPLE"), cex = 0.9)
+       col = c("BLUE", "RED", "PURPLE"), cex = 0.7)
 
 # Plot 2
 # Creates empty plot
@@ -152,6 +159,8 @@ points(other.data$Year, other.data$Turnout, pch = 16, col = "PURPLE")
 legend("topright",
        legend = c("Democratic Winners", "Republican Winners", "Other Party Winners"), 
        pch = c(17, 15, 16),
-       col = c("BLUE", "RED", "PURPLE"), cex = 0.9)
+       col = c("BLUE", "RED", "PURPLE"), cex = 0.8)
 
+# Finishes pdf
+dev.off()
 
